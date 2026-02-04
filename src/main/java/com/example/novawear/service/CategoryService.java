@@ -32,6 +32,7 @@ public class CategoryService {
         Category c = Category.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
+                .imageUrl(dto.getImageUrl())
                 .build();
         c = categoryRepository.save(c);
         return CategoryDto.from(c);
@@ -42,6 +43,7 @@ public class CategoryService {
         Category c = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found: " + id));
         c.setName(dto.getName());
         c.setDescription(dto.getDescription());
+        c.setImageUrl(dto.getImageUrl());
         c = categoryRepository.save(c);
         return CategoryDto.from(c);
     }

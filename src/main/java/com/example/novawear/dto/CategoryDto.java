@@ -19,11 +19,15 @@ public class CategoryDto {
     @Size(max = 500)
     private String description;
 
+    @Size(max = 500)
+    private String imageUrl;
+
     public static CategoryDto from(Category c) {
         CategoryDto dto = new CategoryDto();
         dto.setId(c.getId());
         dto.setName(c.getName());
         dto.setDescription(c.getDescription());
+        dto.setImageUrl(c.getImageUrl());
         return dto;
     }
 }

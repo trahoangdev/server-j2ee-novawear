@@ -2,6 +2,8 @@ package com.example.novawear.config;
 
 import com.example.novawear.entity.*;
 import com.example.novawear.repository.*;
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -13,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -26,12 +27,30 @@ public class SeedDataRunner implements CommandLineRunner {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final ReviewRepository reviewRepository;
+    private final com.example.novawear.repository.BannerRepository bannerRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(String... args) {
         log.info("Seed: checking database...");
+
+        // Seed banners nếu chưa có (chạy độc lập với categories)
+        if (bannerRepository.count() == 0) {
+            log.info("Seed: inserting default banners...");
+            String imgBase = "https://images.unsplash.com/photo-";
+            List<Banner> defaultBanners = Arrays.asList(
+                    Banner.builder().title("Bộ Sưu Tập\nXuân Hè 2024").subtitle("Khám phá những xu hướng thời trang mới nhất")
+                            .imageUrl(imgBase + "1483985988355-763728e1935b?w=1600&q=80").linkUrl("/shop").ctaText("Khám Phá Ngay").sortOrder(0).active(true).build(),
+                    Banner.builder().title("Thanh Lịch\nMỗi Ngày").subtitle("Phong cách công sở hiện đại, tinh tế")
+                            .imageUrl(imgBase + "1490481651871-ab68de25d43d?w=1600&q=80").linkUrl("/shop?category=tops").ctaText("Xem Bộ Sưu Tập").sortOrder(1).active(true).build(),
+                    Banner.builder().title("Giảm Giá\nĐến 50%").subtitle("Ưu đãi đặc biệt cho thành viên mới")
+                            .imageUrl(imgBase + "1469334031218-e382a71b716b?w=1600&q=80").linkUrl("/shop?sale=true").ctaText("Mua Ngay").sortOrder(2).active(true).build()
+            );
+            bannerRepository.saveAll(defaultBanners);
+            log.info("Seed: banners inserted count={}", defaultBanners.size());
+        }
+
         // Seed users nếu chưa có (admin/customer từ lần chạy trước vẫn chỉ có 1 user)
         User admin = userRepository.findByUsername("admin").orElseGet(() -> {
             User u = User.builder()

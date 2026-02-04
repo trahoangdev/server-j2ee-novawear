@@ -23,6 +23,8 @@ public class ProductController {
     public ResponseEntity<Page<ProductDto>> list(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean onSale,
+            @RequestParam(required = false) Boolean bestseller,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -32,12 +34,20 @@ public class ProductController {
         if (search != null && !search.isBlank()) {
             return ResponseEntity.ok(productService.search(search, pageable));
         }
+        if (Boolean.TRUE.equals(onSale) || Boolean.TRUE.equals(bestseller)) {
+            return ResponseEntity.ok(productService.findAllFiltered(onSale, bestseller, pageable));
+        }
         return ResponseEntity.ok(productService.findAll(pageable));
     }
 
     @GetMapping("/featured")
     public ResponseEntity<List<ProductDto>> featured() {
         return ResponseEntity.ok(productService.findFeatured());
+    }
+
+    @GetMapping("/bestseller")
+    public ResponseEntity<List<ProductDto>> bestseller() {
+        return ResponseEntity.ok(productService.findBestseller());
     }
 
     @GetMapping("/{id}")

@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -33,6 +34,24 @@ public class ProductDto {
     @NotNull
     private Integer stock;
 
+    /** Giá khuyến mãi (null = không giảm) */
+    private BigDecimal salePrice;
+
+    /** Nổi bật: hiển thị block "Sản phẩm nổi bật" */
+    private Boolean featured;
+
+    /** Bán chạy: nhãn do admin đánh dấu */
+    private Boolean bestseller;
+
+    /** Hàng mới: badge "Mới" trên thẻ sản phẩm */
+    private Boolean isNew;
+
+    /** Mã size, e.g. ["S","M","L","XL"] */
+    private List<String> sizes;
+
+    /** Màu sắc: tên + mã hex */
+    private List<ProductColorDto> colors;
+
     public static ProductDto from(Product p) {
         ProductDto dto = new ProductDto();
         dto.setId(p.getId());
@@ -43,6 +62,10 @@ public class ProductDto {
         dto.setCategoryId(p.getCategory().getId());
         dto.setCategoryName(p.getCategory().getName());
         dto.setStock(p.getStock());
+        dto.setSalePrice(p.getSalePrice());
+        dto.setFeatured(p.getFeatured() != null ? p.getFeatured() : false);
+        dto.setBestseller(p.getBestseller() != null ? p.getBestseller() : false);
+        dto.setIsNew(p.getIsNew() != null ? p.getIsNew() : false);
         return dto;
     }
 }

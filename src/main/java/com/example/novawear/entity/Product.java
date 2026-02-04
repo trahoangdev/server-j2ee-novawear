@@ -52,6 +52,36 @@ public class Product {
     @Builder.Default
     private Integer stock = 0;
 
+    /** Giá khuyến mãi (null = không giảm). Nếu set và < price thì hiển thị sale. */
+    @DecimalMin("0")
+    @Column(name = "sale_price", precision = 12, scale = 2)
+    private BigDecimal salePrice;
+
+    /** Nổi bật: hiển thị ở block "Sản phẩm nổi bật" trang chủ */
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean featured = false;
+
+    /** Bán chạy: nhãn do admin đánh dấu */
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean bestseller = false;
+
+    /** Hàng mới: hiển thị badge "Mới" trên thẻ sản phẩm */
+    @Column(name = "is_new", nullable = false)
+    @Builder.Default
+    private Boolean isNew = false;
+
+    /** JSON array of size codes, e.g. ["S","M","L","XL"]. Max 500 chars. */
+    @Size(max = 500)
+    @Column(name = "sizes", length = 500)
+    private String sizes;
+
+    /** JSON array of {name, hex}, e.g. [{"name":"Đen","hex":"#2D2D2D"}]. Max 2000 chars. */
+    @Size(max = 2000)
+    @Column(name = "colors", length = 2000)
+    private String colors;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderDetail> orderDetails = new ArrayList<>();

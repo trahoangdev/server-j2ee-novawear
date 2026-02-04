@@ -19,4 +19,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> searchByName(@Param("keyword") String keyword, Pageable pageable);
 
     List<Product> findTop8ByOrderByIdDesc();
+
+    /** Sản phẩm nổi bật (featured = true), tối đa 8, ưu tiên id mới */
+    List<Product> findTop8ByFeaturedTrueOrderByIdDesc();
+
+    /** Sản phẩm bán chạy (bestseller = true), tối đa 8 */
+    List<Product> findTop8ByBestsellerTrueOrderByIdDesc();
+
+    @Query("SELECT p FROM Product p WHERE (:onSale is null or (p.salePrice is not null and p.salePrice < p.price)) and (:bestseller is null or p.bestseller = :bestseller)")
+    Page<Product> findAllFiltered(@Param("onSale") Boolean onSale, @Param("bestseller") Boolean bestseller, Pageable pageable);
 }
