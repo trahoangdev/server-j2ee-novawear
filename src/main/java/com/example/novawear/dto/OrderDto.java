@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 public class OrderDto {
 
     private Long id;
+    /** Mã đơn hàng: dãy 4–6 chữ số (pad ID thành 6 chữ số) */
+    private String orderNumber;
     private Long userId;
     private String username;
     private BigDecimal totalAmount;
@@ -26,6 +28,7 @@ public class OrderDto {
     public static OrderDto from(Order o) {
         OrderDto dto = new OrderDto();
         dto.setId(o.getId());
+        dto.setOrderNumber(String.format("%06d", o.getId()));
         dto.setUserId(o.getUser().getId());
         dto.setUsername(o.getUser().getUsername());
         dto.setTotalAmount(o.getTotalAmount());

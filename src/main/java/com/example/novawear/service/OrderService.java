@@ -55,11 +55,20 @@ public class OrderService {
 
     @Transactional
     public OrderDto checkout(String username, CheckoutRequest request) {
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new IllegalArgumentException("Cart must not be empty");
+        }
         User user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
         List<OrderDetail> details = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
         for (var item : request.getItems()) {
+            if (item.getProductId() == null || item.getQuantity() == null || item.getQuantity() < 1) {
+                throw new IllegalArgumentException("Invalid item: productId and quantity required");
+            }
             Product product = productRepository.findById(item.getProductId()).orElseThrow(() -> new IllegalArgumentException("Product not found: " + item.getProductId()));
+            if (product.getPrice() == null) {
+                throw new IllegalArgumentException("Product has no price: " + product.getName());
+            }
             if (product.getStock() < item.getQuantity()) {
                 throw new IllegalArgumentException("Insufficient stock for product: " + product.getName());
             }
@@ -78,13 +87,13 @@ public class OrderService {
                 .totalAmount(total)
                 .status(Order.OrderStatus.PENDING)
                 .build();
-        order = orderRepository.save(order);
         for (OrderDetail od : details) {
             od.setOrder(order);
             order.getOrderDetails().add(od);
         }
-        orderRepository.save(order);
-        return OrderDto.from(order);
+        order = orderRepository.save(order);
+        Order saved = orderRepository.findById(order.getId()).orElseThrow();
+        return OrderDto.from(saved);
     }
 
     @Transactional
