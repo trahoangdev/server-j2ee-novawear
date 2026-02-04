@@ -25,6 +25,7 @@ public class ProductController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean onSale,
             @RequestParam(required = false) Boolean bestseller,
+            @RequestParam(required = false) Boolean isNew,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -34,8 +35,8 @@ public class ProductController {
         if (search != null && !search.isBlank()) {
             return ResponseEntity.ok(productService.search(search, pageable));
         }
-        if (Boolean.TRUE.equals(onSale) || Boolean.TRUE.equals(bestseller)) {
-            return ResponseEntity.ok(productService.findAllFiltered(onSale, bestseller, pageable));
+        if (Boolean.TRUE.equals(onSale) || Boolean.TRUE.equals(bestseller) || Boolean.TRUE.equals(isNew)) {
+            return ResponseEntity.ok(productService.findAllFiltered(onSale, bestseller, isNew, pageable));
         }
         return ResponseEntity.ok(productService.findAll(pageable));
     }
@@ -53,5 +54,10 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getById(id));
+    }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<ProductDto> getBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(productService.getBySlug(slug));
     }
 }

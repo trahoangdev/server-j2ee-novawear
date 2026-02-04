@@ -63,10 +63,56 @@ public class ProductService {
         }
     }
 
+    private List<String> parseImages(String json) {
+        if (json == null || json.isBlank()) return Collections.emptyList();
+        try {
+            return objectMapper.readValue(json, new TypeReference<>() {});
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    private String serializeImages(List<String> list) {
+        if (list == null || list.isEmpty()) return null;
+        try {
+            return objectMapper.writeValueAsString(list);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Generate slug from product name.
+     * Converts to lowercase, replaces spaces with hyphens, removes special characters.
+     */
+    private String generateSlug(String name) {
+        if (name == null || name.isBlank()) return null;
+        String slug = name.trim()
+                .toLowerCase()
+                .replaceAll("[àáạảãâầấậẩẫăằắặẳẵ]", "a")
+                .replaceAll("[èéẹẻẽêềếệểễ]", "e")
+                .replaceAll("[ìíịỉĩ]", "i")
+                .replaceAll("[òóọỏõôồốộổỗơờớợởỡ]", "o")
+                .replaceAll("[ùúụủũưừứựửữ]", "u")
+                .replaceAll("[ỳýỵỷỹ]", "y")
+                .replaceAll("[đ]", "d")
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-|-$", "");
+        return slug.isEmpty() ? null : slug;
+    }
+
     private ProductDto toDto(Product p) {
         ProductDto dto = ProductDto.from(p);
         dto.setSizes(parseSizes(p.getSizes()));
         dto.setColors(parseColors(p.getColors()));
+        List<String> imageList = parseImages(p.getImages());
+        // Backward compatibility: if images is empty but imageUrl exists, use imageUrl
+        if (imageList.isEmpty() && p.getImageUrl() != null && !p.getImageUrl().isBlank()) {
+            imageList = Collections.singletonList(p.getImageUrl());
+        }
+        dto.setImages(imageList);
         return dto;
     }
 
@@ -77,13 +123,20 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public ProductDto getBySlug(String slug) {
+        Product p = productRepository.findBySlug(slug)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found with slug: " + slug));
+        return toDto(p);
+    }
+
+    @Transactional(readOnly = true)
     public Page<ProductDto> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(this::toDto);
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductDto> findAllFiltered(Boolean onSale, Boolean bestseller, Pageable pageable) {
-        return productRepository.findAllFiltered(onSale, bestseller, pageable).map(this::toDto);
+    public Page<ProductDto> findAllFiltered(Boolean onSale, Boolean bestseller, Boolean isNew, Pageable pageable) {
+        return productRepository.findAllFiltered(onSale, bestseller, isNew, pageable).map(this::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -114,8 +167,14 @@ public class ProductService {
     @Transactional
     public ProductDto create(ProductDto dto) {
         Category cat = categoryRepository.findById(dto.getCategoryId()).orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        // Generate slug if not provided
+        String slug = dto.getSlug();
+        if (slug == null || slug.isBlank()) {
+            slug = generateSlug(dto.getName());
+        }
         Product p = Product.builder()
                 .name(dto.getName())
+                .slug(slug)
                 .price(dto.getPrice())
                 .description(dto.getDescription())
                 .imageUrl(dto.getImageUrl())
@@ -128,6 +187,17 @@ public class ProductService {
                 .build();
         p.setSizes(serializeSizes(dto.getSizes()));
         p.setColors(serializeColors(dto.getColors()));
+        // Set images: use images list if provided, otherwise fallback to imageUrl
+        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            p.setImages(serializeImages(dto.getImages()));
+            // Also set imageUrl to first image for backward compatibility
+            if (p.getImageUrl() == null || p.getImageUrl().isBlank()) {
+                p.setImageUrl(dto.getImages().get(0));
+            }
+        } else if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+            // If only imageUrl provided, convert to images array
+            p.setImages(serializeImages(Collections.singletonList(dto.getImageUrl())));
+        }
         p = productRepository.save(p);
         return toDto(p);
     }
@@ -139,7 +209,16 @@ public class ProductService {
             Category cat = categoryRepository.findById(dto.getCategoryId()).orElseThrow(() -> new IllegalArgumentException("Category not found"));
             p.setCategory(cat);
         }
-        if (dto.getName() != null) p.setName(dto.getName());
+        if (dto.getName() != null) {
+            p.setName(dto.getName());
+            // Regenerate slug if name changed and slug not explicitly provided
+            if (dto.getSlug() == null || dto.getSlug().isBlank()) {
+                p.setSlug(generateSlug(dto.getName()));
+            }
+        }
+        if (dto.getSlug() != null && !dto.getSlug().isBlank()) {
+            p.setSlug(dto.getSlug());
+        }
         if (dto.getPrice() != null) p.setPrice(dto.getPrice());
         if (dto.getDescription() != null) p.setDescription(dto.getDescription());
         if (dto.getImageUrl() != null) p.setImageUrl(dto.getImageUrl());
@@ -150,6 +229,17 @@ public class ProductService {
         if (dto.getIsNew() != null) p.setIsNew(dto.getIsNew());
         if (dto.getSizes() != null) p.setSizes(serializeSizes(dto.getSizes()));
         if (dto.getColors() != null) p.setColors(serializeColors(dto.getColors()));
+        // Update images: use images list if provided, otherwise fallback to imageUrl
+        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            p.setImages(serializeImages(dto.getImages()));
+            // Also update imageUrl to first image for backward compatibility
+            if (p.getImageUrl() == null || p.getImageUrl().isBlank()) {
+                p.setImageUrl(dto.getImages().get(0));
+            }
+        } else if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+            // If only imageUrl provided, convert to images array
+            p.setImages(serializeImages(Collections.singletonList(dto.getImageUrl())));
+        }
         p = productRepository.save(p);
         return toDto(p);
     }
