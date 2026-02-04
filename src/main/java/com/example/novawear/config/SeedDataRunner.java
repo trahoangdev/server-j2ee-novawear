@@ -30,6 +30,27 @@ public class SeedDataRunner implements CommandLineRunner {
     private final com.example.novawear.repository.BannerRepository bannerRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Generate slug from product name (same logic as ProductService).
+     */
+    private String generateSlug(String name) {
+        if (name == null || name.isBlank()) return null;
+        String slug = name.trim()
+                .toLowerCase()
+                .replaceAll("[àáạảãâầấậẩẫăằắặẳẵ]", "a")
+                .replaceAll("[èéẹẻẽêềếệểễ]", "e")
+                .replaceAll("[ìíịỉĩ]", "i")
+                .replaceAll("[òóọỏõôồốộổỗơờớợởỡ]", "o")
+                .replaceAll("[ùúụủũưừứựửữ]", "u")
+                .replaceAll("[ỳýỵỷỹ]", "y")
+                .replaceAll("[đ]", "d")
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-|-$", "");
+        return slug.isEmpty() ? null : slug;
+    }
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -106,22 +127,27 @@ public class SeedDataRunner implements CommandLineRunner {
         String imgBase = "https://images.unsplash.com/photo-";
         Product p1 = productRepository.save(Product.builder()
                 .name("Áo Blazer Dáng Rộng Premium")
+                .slug(generateSlug("Áo Blazer Dáng Rộng Premium"))
                 .price(new BigDecimal("1890000"))
                 .description("Áo blazer thiết kế hiện đại, chất liệu cao cấp.")
                 .imageUrl(imgBase + "1594938298603-c8148c4dae35?w=800&q=80")
                 .category(catAo)
                 .stock(45)
+                .featured(true)
                 .build());
         Product p2 = productRepository.save(Product.builder()
                 .name("Váy Midi Hoa Nhí Vintage")
+                .slug(generateSlug("Váy Midi Hoa Nhí Vintage"))
                 .price(new BigDecimal("890000"))
                 .description("Váy midi họa tiết hoa nhí, chất vải mềm thoáng.")
                 .imageUrl(imgBase + "1572804013309-59a88b7e92f1?w=800&q=80")
                 .category(catVay)
                 .stock(32)
+                .isNew(true)
                 .build());
         Product p3 = productRepository.save(Product.builder()
                 .name("Quần Palazzo Ống Rộng")
+                .slug(generateSlug("Quần Palazzo Ống Rộng"))
                 .price(new BigDecimal("750000"))
                 .description("Quần ống rộng thanh lịch, chất liệu cao cấp.")
                 .imageUrl(imgBase + "1506629082955-511b1aa562c8?w=800&q=80")
@@ -130,14 +156,17 @@ public class SeedDataRunner implements CommandLineRunner {
                 .build());
         Product p4 = productRepository.save(Product.builder()
                 .name("Túi Xách Mini Đeo Chéo")
+                .slug(generateSlug("Túi Xách Mini Đeo Chéo"))
                 .price(new BigDecimal("1290000"))
                 .description("Túi mini tiện dụng, thiết kế sang trọng.")
                 .imageUrl(imgBase + "1548036328-c9fa89d128fa?w=800&q=80")
                 .category(catTui)
                 .stock(23)
+                .bestseller(true)
                 .build());
         Product p5 = productRepository.save(Product.builder()
                 .name("Giày Sandal Quai Ngang")
+                .slug(generateSlug("Giày Sandal Quai Ngang"))
                 .price(new BigDecimal("590000"))
                 .description("Sandal quai ngang minimalist, đế êm.")
                 .imageUrl(imgBase + "1542291026-7eec264c27ff?w=800&q=80")
@@ -146,7 +175,9 @@ public class SeedDataRunner implements CommandLineRunner {
                 .build());
         Product p6 = productRepository.save(Product.builder()
                 .name("Áo Thun Basic Cotton")
+                .slug(generateSlug("Áo Thun Basic Cotton"))
                 .price(new BigDecimal("299000"))
+                .salePrice(new BigDecimal("199000"))
                 .description("Áo thun cotton 100%, form regular.")
                 .imageUrl(imgBase + "1521572163474-6864f9cf17ab?w=800&q=80")
                 .category(catAo)
@@ -154,6 +185,7 @@ public class SeedDataRunner implements CommandLineRunner {
                 .build());
         Product p7 = productRepository.save(Product.builder()
                 .name("Quần Jean Slim Fit")
+                .slug(generateSlug("Quần Jean Slim Fit"))
                 .price(new BigDecimal("650000"))
                 .description("Quần jean slim fit co giãn nhẹ.")
                 .imageUrl(imgBase + "1594633312681-425c7b97ccd1?w=800&q=80")
@@ -162,6 +194,7 @@ public class SeedDataRunner implements CommandLineRunner {
                 .build());
         Product p8 = productRepository.save(Product.builder()
                 .name("Ví Da Nam Cao Cấp")
+                .slug(generateSlug("Ví Da Nam Cao Cấp"))
                 .price(new BigDecimal("450000"))
                 .description("Ví da bò thật, nhiều ngăn.")
                 .imageUrl(imgBase + "1611923134239-b9be5b4d1b2b?w=800&q=80")

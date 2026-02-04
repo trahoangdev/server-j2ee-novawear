@@ -29,6 +29,10 @@ public class Product {
     @Column(nullable = false, length = 200)
     private String name;
 
+    @Size(max = 255)
+    @Column(name = "slug", length = 255)
+    private String slug;
+
     @NotNull
     @DecimalMin("0")
     @Column(nullable = false, precision = 12, scale = 2)
@@ -41,6 +45,11 @@ public class Product {
     @Size(max = 500)
     @Column(name = "image_url", length = 500)
     private String imageUrl;
+
+    /** JSON array of image URLs, e.g. ["url1", "url2"]. Max 2000 chars. */
+    @Size(max = 2000)
+    @Column(name = "images", columnDefinition = "TEXT")
+    private String images;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

@@ -36,12 +36,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/banners").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/product/**").permitAll() // GET reviews là public
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // User (authenticated)
-                        .requestMatchers("/api/cart/**", "/api/orders/**", "/api/reviews/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/cart/**", "/api/orders/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasAnyRole("USER", "ADMIN") // POST reviews cần auth
                         .requestMatchers("/api/auth/me", "/api/users/me").authenticated()
                         .anyRequest().authenticated()
                 )

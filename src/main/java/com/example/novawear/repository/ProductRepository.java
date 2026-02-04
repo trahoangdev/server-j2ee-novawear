@@ -26,6 +26,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     /** Sản phẩm bán chạy (bestseller = true), tối đa 8 */
     List<Product> findTop8ByBestsellerTrueOrderByIdDesc();
 
-    @Query("SELECT p FROM Product p WHERE (:onSale is null or (p.salePrice is not null and p.salePrice < p.price)) and (:bestseller is null or p.bestseller = :bestseller)")
-    Page<Product> findAllFiltered(@Param("onSale") Boolean onSale, @Param("bestseller") Boolean bestseller, Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE (:onSale is null or (p.salePrice is not null and p.salePrice < p.price)) and (:bestseller is null or p.bestseller = :bestseller) and (:isNew is null or p.isNew = :isNew)")
+    Page<Product> findAllFiltered(@Param("onSale") Boolean onSale, @Param("bestseller") Boolean bestseller, @Param("isNew") Boolean isNew, Pageable pageable);
+
+    /** Tìm sản phẩm theo slug */
+    java.util.Optional<Product> findBySlug(String slug);
 }
