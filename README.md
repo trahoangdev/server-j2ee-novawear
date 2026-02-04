@@ -36,7 +36,7 @@ Trong Swagger UI, bấm **Authorize** và nhập JWT token (trả về từ `POS
 Seed **tắt mặc định**. Chỉ chạy khi bật profile `seed`:
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=seed
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=seed"
 ```
 
 Khi chạy với profile `seed`: tạo users (admin, customer, nguyenvan) nếu chưa có; nếu chưa có category nào thì chèn thêm categories, products, orders, reviews.

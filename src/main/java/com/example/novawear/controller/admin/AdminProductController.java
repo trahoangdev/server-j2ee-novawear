@@ -1,6 +1,7 @@
 package com.example.novawear.controller.admin;
 
 import com.example.novawear.dto.ProductDto;
+import com.example.novawear.dto.ProductFlagsDto;
 import com.example.novawear.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,11 @@ public class AdminProductController {
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> update(@PathVariable Long id, @Valid @RequestBody ProductDto dto) {
         return ResponseEntity.ok(productService.update(id, dto));
+    }
+
+    @PatchMapping("/{id}/flags")
+    public ResponseEntity<ProductDto> updateFlags(@PathVariable Long id, @RequestBody ProductFlagsDto dto) {
+        return ResponseEntity.ok(productService.updateFlags(id, dto));
     }
 
     @DeleteMapping("/{id}")

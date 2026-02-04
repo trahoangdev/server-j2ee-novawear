@@ -1,6 +1,8 @@
 package com.example.novawear.service;
 
+import com.example.novawear.dto.ReviewCreateRequest;
 import com.example.novawear.dto.ReviewDto;
+import com.example.novawear.dto.ReviewUpdateRequest;
 import com.example.novawear.entity.Product;
 import com.example.novawear.entity.Review;
 import com.example.novawear.entity.User;
@@ -38,6 +40,39 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public Page<ReviewDto> findAll(Pageable pageable) {
         return reviewRepository.findAllByOrderByIdDesc(pageable).map(ReviewDto::from);
+    }
+
+    @Transactional(readOnly = true)
+    public ReviewDto getById(Long id) {
+        Review r = reviewRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Review not found: " + id));
+        return ReviewDto.from(r);
+    }
+
+    @Transactional
+    public ReviewDto createByAdmin(ReviewCreateRequest req) {
+        User user = userRepository.findById(req.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found: " + req.getUserId()));
+        Product product = productRepository.findById(req.getProductId()).orElseThrow(() -> new IllegalArgumentException("Product not found: " + req.getProductId()));
+        Review r = Review.builder()
+                .product(product)
+                .user(user)
+                .rating(req.getRating())
+                .comment(req.getComment() != null ? req.getComment() : "")
+                .approved(Boolean.TRUE.equals(req.getApproved()))
+                .build();
+        r = reviewRepository.save(r);
+        ReviewDto result = ReviewDto.from(r);
+        result.setUsername(user.getUsername());
+        return result;
+    }
+
+    @Transactional
+    public ReviewDto update(Long id, ReviewUpdateRequest req) {
+        Review r = reviewRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Review not found: " + id));
+        if (req.getRating() != null) r.setRating(req.getRating());
+        if (req.getComment() != null) r.setComment(req.getComment());
+        if (req.getApproved() != null) r.setApproved(req.getApproved());
+        r = reviewRepository.save(r);
+        return ReviewDto.from(r);
     }
 
     @Transactional
