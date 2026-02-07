@@ -23,6 +23,10 @@ public class OrderDto {
     private BigDecimal totalAmount;
     private String status;
     private Instant orderDate;
+    private String recipientName;
+    private String address;
+    private String phone;
+    private String note;
     private List<OrderDetailDto> orderDetails;
 
     public static OrderDto from(Order o) {
@@ -34,6 +38,10 @@ public class OrderDto {
         dto.setTotalAmount(o.getTotalAmount());
         dto.setStatus(o.getStatus().name());
         dto.setOrderDate(o.getOrderDate());
+        dto.setRecipientName(o.getRecipientName());
+        dto.setAddress(o.getAddress());
+        dto.setPhone(o.getPhone());
+        dto.setNote(o.getNote());
         if (o.getOrderDetails() != null) {
             dto.setOrderDetails(o.getOrderDetails().stream()
                     .map(OrderDetailDto::from)

@@ -26,6 +26,7 @@ public class ProductController {
             @RequestParam(required = false) Boolean onSale,
             @RequestParam(required = false) Boolean bestseller,
             @RequestParam(required = false) Boolean isNew,
+            @RequestParam(required = false) Boolean lowStock,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -34,6 +35,9 @@ public class ProductController {
         }
         if (search != null && !search.isBlank()) {
             return ResponseEntity.ok(productService.search(search, pageable));
+        }
+        if (Boolean.TRUE.equals(lowStock)) {
+            return ResponseEntity.ok(productService.findLowStock(10, pageable));
         }
         if (Boolean.TRUE.equals(onSale) || Boolean.TRUE.equals(bestseller) || Boolean.TRUE.equals(isNew)) {
             return ResponseEntity.ok(productService.findAllFiltered(onSale, bestseller, isNew, pageable));

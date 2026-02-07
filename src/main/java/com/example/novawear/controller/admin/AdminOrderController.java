@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+
 @RestController
 @RequestMapping("/api/admin/orders")
 @RequiredArgsConstructor
@@ -22,19 +24,23 @@ public class AdminOrderController {
 
     @GetMapping
     public ResponseEntity<Page<OrderDto>> list(
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Instant fromDate,
+            @RequestParam(required = false) Instant toDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
+
+        Order.OrderStatus s = null;
         if (status != null && !status.isBlank()) {
             try {
-                Order.OrderStatus s = Order.OrderStatus.valueOf(status.toUpperCase());
-                return ResponseEntity.ok(orderService.findByStatus(s, pageable));
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.ok(orderService.findAll(pageable));
+                s = Order.OrderStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException ignored) {
             }
         }
-        return ResponseEntity.ok(orderService.findAll(pageable));
+
+        return ResponseEntity.ok(orderService.search(search, s, fromDate, toDate, pageable));
     }
 
     @GetMapping("/{id}")

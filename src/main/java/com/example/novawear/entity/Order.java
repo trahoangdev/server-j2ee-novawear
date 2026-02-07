@@ -46,6 +46,18 @@ public class Order {
     @Builder.Default
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
+    @Column(name = "recipient_name")
+    private String recipientName;
+
+    @Column(length = 500)
+    private String address;
+
+    @Column(length = 20)
+    private String phone;
+
+    @Column(columnDefinition = "TEXT")
+    private String note;
+
     public enum OrderStatus {
         PENDING,
         CONFIRMED,

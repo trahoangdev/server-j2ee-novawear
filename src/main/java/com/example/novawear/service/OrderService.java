@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,8 +49,15 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
+    public Page<OrderDto> search(String keyword, Order.OrderStatus status, Instant fromDate, Instant toDate,
+            Pageable pageable) {
+        return orderRepository.searchOrders(keyword, status, fromDate, toDate, pageable).map(OrderDto::from);
+    }
+
+    @Transactional(readOnly = true)
     public OrderDto getById(Long id) {
-        Order o = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
+        Order o = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
         return OrderDto.from(o);
     }
 
@@ -58,14 +66,16 @@ public class OrderService {
         if (request.getItems() == null || request.getItems().isEmpty()) {
             throw new IllegalArgumentException("Cart must not be empty");
         }
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         List<OrderDetail> details = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
         for (var item : request.getItems()) {
             if (item.getProductId() == null || item.getQuantity() == null || item.getQuantity() < 1) {
                 throw new IllegalArgumentException("Invalid item: productId and quantity required");
             }
-            Product product = productRepository.findById(item.getProductId()).orElseThrow(() -> new IllegalArgumentException("Product not found: " + item.getProductId()));
+            Product product = productRepository.findById(item.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found: " + item.getProductId()));
             if (product.getPrice() == null) {
                 throw new IllegalArgumentException("Product has no price: " + product.getName());
             }
@@ -86,6 +96,10 @@ public class OrderService {
                 .user(user)
                 .totalAmount(total)
                 .status(Order.OrderStatus.PENDING)
+                .recipientName(request.getRecipientName())
+                .address(request.getAddress())
+                .phone(request.getPhone())
+                .note(request.getNote())
                 .build();
         for (OrderDetail od : details) {
             od.setOrder(order);
@@ -98,7 +112,8 @@ public class OrderService {
 
     @Transactional
     public OrderDto updateStatus(Long id, Order.OrderStatus status) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
         order.setStatus(status);
         order = orderRepository.save(order);
         return OrderDto.from(order);
