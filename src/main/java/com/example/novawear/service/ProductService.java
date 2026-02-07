@@ -28,25 +28,30 @@ public class ProductService {
     private final ObjectMapper objectMapper;
 
     private List<String> parseSizes(String json) {
-        if (json == null || json.isBlank()) return Collections.emptyList();
+        if (json == null || json.isBlank())
+            return Collections.emptyList();
         try {
-            return objectMapper.readValue(json, new TypeReference<>() {});
+            return objectMapper.readValue(json, new TypeReference<>() {
+            });
         } catch (Exception e) {
             return Collections.emptyList();
         }
     }
 
     private List<ProductColorDto> parseColors(String json) {
-        if (json == null || json.isBlank()) return Collections.emptyList();
+        if (json == null || json.isBlank())
+            return Collections.emptyList();
         try {
-            return objectMapper.readValue(json, new TypeReference<>() {});
+            return objectMapper.readValue(json, new TypeReference<>() {
+            });
         } catch (Exception e) {
             return Collections.emptyList();
         }
     }
 
     private String serializeSizes(List<String> list) {
-        if (list == null || list.isEmpty()) return null;
+        if (list == null || list.isEmpty())
+            return null;
         try {
             return objectMapper.writeValueAsString(list);
         } catch (Exception e) {
@@ -55,7 +60,8 @@ public class ProductService {
     }
 
     private String serializeColors(List<ProductColorDto> list) {
-        if (list == null || list.isEmpty()) return null;
+        if (list == null || list.isEmpty())
+            return null;
         try {
             return objectMapper.writeValueAsString(list);
         } catch (Exception e) {
@@ -64,16 +70,19 @@ public class ProductService {
     }
 
     private List<String> parseImages(String json) {
-        if (json == null || json.isBlank()) return Collections.emptyList();
+        if (json == null || json.isBlank())
+            return Collections.emptyList();
         try {
-            return objectMapper.readValue(json, new TypeReference<>() {});
+            return objectMapper.readValue(json, new TypeReference<>() {
+            });
         } catch (Exception e) {
             return Collections.emptyList();
         }
     }
 
     private String serializeImages(List<String> list) {
-        if (list == null || list.isEmpty()) return null;
+        if (list == null || list.isEmpty())
+            return null;
         try {
             return objectMapper.writeValueAsString(list);
         } catch (Exception e) {
@@ -83,10 +92,12 @@ public class ProductService {
 
     /**
      * Generate slug from product name.
-     * Converts to lowercase, replaces spaces with hyphens, removes special characters.
+     * Converts to lowercase, replaces spaces with hyphens, removes special
+     * characters.
      */
     private String generateSlug(String name) {
-        if (name == null || name.isBlank()) return null;
+        if (name == null || name.isBlank())
+            return null;
         String slug = name.trim()
                 .toLowerCase()
                 .replaceAll("[àáạảãâầấậẩẫăằắặẳẵ]", "a")
@@ -118,7 +129,8 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDto getById(Long id) {
-        Product p = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+        Product p = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
         return toDto(p);
     }
 
@@ -145,6 +157,11 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public Page<ProductDto> findLowStock(int threshold, Pageable pageable) {
+        return productRepository.findByStockLessThan(threshold, pageable).map(this::toDto);
+    }
+
+    @Transactional(readOnly = true)
     public Page<ProductDto> search(String keyword, Pageable pageable) {
         if (keyword == null || keyword.isBlank()) {
             return productRepository.findAll(pageable).map(this::toDto);
@@ -166,7 +183,8 @@ public class ProductService {
 
     @Transactional
     public ProductDto create(ProductDto dto) {
-        Category cat = categoryRepository.findById(dto.getCategoryId()).orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        Category cat = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
         // Generate slug if not provided
         String slug = dto.getSlug();
         if (slug == null || slug.isBlank()) {
@@ -204,9 +222,11 @@ public class ProductService {
 
     @Transactional
     public ProductDto update(Long id, ProductDto dto) {
-        Product p = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+        Product p = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
         if (dto.getCategoryId() != null) {
-            Category cat = categoryRepository.findById(dto.getCategoryId()).orElseThrow(() -> new IllegalArgumentException("Category not found"));
+            Category cat = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Category not found"));
             p.setCategory(cat);
         }
         if (dto.getName() != null) {
@@ -219,16 +239,25 @@ public class ProductService {
         if (dto.getSlug() != null && !dto.getSlug().isBlank()) {
             p.setSlug(dto.getSlug());
         }
-        if (dto.getPrice() != null) p.setPrice(dto.getPrice());
-        if (dto.getDescription() != null) p.setDescription(dto.getDescription());
-        if (dto.getImageUrl() != null) p.setImageUrl(dto.getImageUrl());
-        if (dto.getStock() != null) p.setStock(dto.getStock());
+        if (dto.getPrice() != null)
+            p.setPrice(dto.getPrice());
+        if (dto.getDescription() != null)
+            p.setDescription(dto.getDescription());
+        if (dto.getImageUrl() != null)
+            p.setImageUrl(dto.getImageUrl());
+        if (dto.getStock() != null)
+            p.setStock(dto.getStock());
         p.setSalePrice(dto.getSalePrice()); // null = bỏ giảm giá
-        if (dto.getFeatured() != null) p.setFeatured(dto.getFeatured());
-        if (dto.getBestseller() != null) p.setBestseller(dto.getBestseller());
-        if (dto.getIsNew() != null) p.setIsNew(dto.getIsNew());
-        if (dto.getSizes() != null) p.setSizes(serializeSizes(dto.getSizes()));
-        if (dto.getColors() != null) p.setColors(serializeColors(dto.getColors()));
+        if (dto.getFeatured() != null)
+            p.setFeatured(dto.getFeatured());
+        if (dto.getBestseller() != null)
+            p.setBestseller(dto.getBestseller());
+        if (dto.getIsNew() != null)
+            p.setIsNew(dto.getIsNew());
+        if (dto.getSizes() != null)
+            p.setSizes(serializeSizes(dto.getSizes()));
+        if (dto.getColors() != null)
+            p.setColors(serializeColors(dto.getColors()));
         // Update images: use images list if provided, otherwise fallback to imageUrl
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
             p.setImages(serializeImages(dto.getImages()));
@@ -247,9 +276,12 @@ public class ProductService {
     /** Cập nhật nhanh cờ nổi bật / bán chạy (từ bảng quản lý) */
     @Transactional
     public ProductDto updateFlags(Long id, ProductFlagsDto dto) {
-        Product p = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
-        if (dto.getFeatured() != null) p.setFeatured(dto.getFeatured());
-        if (dto.getBestseller() != null) p.setBestseller(dto.getBestseller());
+        Product p = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+        if (dto.getFeatured() != null)
+            p.setFeatured(dto.getFeatured());
+        if (dto.getBestseller() != null)
+            p.setBestseller(dto.getBestseller());
         p = productRepository.save(p);
         return toDto(p);
     }

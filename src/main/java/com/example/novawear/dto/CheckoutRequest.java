@@ -13,6 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 public class CheckoutRequest {
 
+    private String recipientName;
+    private String address;
+    private String phone;
+    private String note;
+
     /** Payment method: PAYPAL or MOMO */
     private String paymentMethod;
 
