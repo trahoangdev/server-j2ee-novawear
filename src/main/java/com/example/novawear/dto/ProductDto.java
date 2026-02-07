@@ -21,10 +21,10 @@ public class ProductDto {
     @NotBlank
     @Size(max = 200)
     private String name;
-    
+
     @Size(max = 255)
     private String slug;
-    
+
     @NotNull
     @DecimalMin("0")
     private BigDecimal price;
@@ -32,10 +32,10 @@ public class ProductDto {
     private String description;
     @Size(max = 500)
     private String imageUrl;
-    
+
     /** Danh sách URL hình ảnh */
     private List<String> images;
-    
+
     @NotNull
     private Long categoryId;
     private String categoryName;
@@ -60,6 +60,9 @@ public class ProductDto {
     /** Màu sắc: tên + mã hex */
     private List<ProductColorDto> colors;
 
+    /** Giới tính: MALE, FEMALE, UNISEX */
+    private String gender;
+
     public static ProductDto from(Product p) {
         ProductDto dto = new ProductDto();
         dto.setId(p.getId());
@@ -75,6 +78,7 @@ public class ProductDto {
         dto.setFeatured(p.getFeatured() != null ? p.getFeatured() : false);
         dto.setBestseller(p.getBestseller() != null ? p.getBestseller() : false);
         dto.setIsNew(p.getIsNew() != null ? p.getIsNew() : false);
+        dto.setGender(p.getGender() != null ? p.getGender().name() : "UNISEX");
         return dto;
     }
 }

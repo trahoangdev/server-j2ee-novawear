@@ -21,6 +21,9 @@ public class CheckoutRequest {
     /** Payment method: PAYPAL or MOMO */
     private String paymentMethod;
 
+    /** Mã voucher (optional) */
+    private String voucherCode;
+
     @Valid
     @NotEmpty(message = "Cart must not be empty")
     private List<CartAddRequest> items;

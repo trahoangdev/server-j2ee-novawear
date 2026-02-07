@@ -23,6 +23,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "order_code", unique = true, nullable = false, length = 20)
+    private String orderCode;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -57,6 +60,17 @@ public class Order {
 
     @Column(columnDefinition = "TEXT")
     private String note;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucher_id")
+    private Voucher voucher;
+
+    @Column(name = "discount_amount", precision = 12, scale = 2)
+    @Builder.Default
+    private java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
+
+    @Column(name = "payment_method", length = 30)
+    private String paymentMethod;
 
     public enum OrderStatus {
         PENDING,
