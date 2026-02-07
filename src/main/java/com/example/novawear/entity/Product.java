@@ -86,7 +86,10 @@ public class Product {
     @Column(name = "sizes", length = 500)
     private String sizes;
 
-    /** JSON array of {name, hex}, e.g. [{"name":"Đen","hex":"#2D2D2D"}]. Max 2000 chars. */
+    /**
+     * JSON array of {name, hex}, e.g. [{"name":"Đen","hex":"#2D2D2D"}]. Max 2000
+     * chars.
+     */
     @Size(max = 2000)
     @Column(name = "colors", length = 2000)
     private String colors;
@@ -98,4 +101,18 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
+
+    /**
+     * Giới tính: MALE, FEMALE, UNISEX
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private Gender gender = Gender.UNISEX;
+
+    public enum Gender {
+        MALE, // Nam
+        FEMALE, // Nữ
+        UNISEX // Cả nam và nữ
+    }
 }

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class OrderDto {
 
     private Long id;
-    /** Mã đơn hàng: dãy 4–6 chữ số (pad ID thành 6 chữ số) */
+    /** Mã đơn hàng: dãy chữ cái và số ngẫu nhiên (hoặc ID cũ cho đơn hàng cũ) */
     private String orderNumber;
     private Long userId;
     private String username;
@@ -29,10 +29,17 @@ public class OrderDto {
     private String note;
     private List<OrderDetailDto> orderDetails;
 
+    // Voucher fields
+    private Long voucherId;
+    private String voucherCode;
+    private BigDecimal discountAmount;
+    private String paymentMethod;
+
     public static OrderDto from(Order o) {
         OrderDto dto = new OrderDto();
         dto.setId(o.getId());
-        dto.setOrderNumber(String.format("%06d", o.getId()));
+        // dto.setOrderNumber(String.format("%06d", o.getId()));
+        dto.setOrderNumber(o.getOrderCode() != null ? o.getOrderCode() : String.format("%06d", o.getId()));
         dto.setUserId(o.getUser().getId());
         dto.setUsername(o.getUser().getUsername());
         dto.setTotalAmount(o.getTotalAmount());
@@ -47,6 +54,15 @@ public class OrderDto {
                     .map(OrderDetailDto::from)
                     .collect(Collectors.toList()));
         }
+
+        // Voucher fields
+        if (o.getVoucher() != null) {
+            dto.setVoucherId(o.getVoucher().getId());
+            dto.setVoucherCode(o.getVoucher().getCode());
+        }
+        dto.setDiscountAmount(o.getDiscountAmount());
+        dto.setPaymentMethod(o.getPaymentMethod());
+
         return dto;
     }
 }

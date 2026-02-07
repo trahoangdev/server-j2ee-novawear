@@ -181,6 +181,30 @@ public class ProductService {
         return list.stream().map(this::toDto).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public Page<ProductDto> findWithFilters(
+            List<Long> categoryIds,
+            java.math.BigDecimal minPrice,
+            java.math.BigDecimal maxPrice,
+            List<String> sizes,
+            List<String> colors,
+            Double minRating,
+            String gender,
+            String search,
+            Boolean onSale,
+            Boolean bestseller,
+            Boolean isNew,
+            Boolean lowStock,
+            Pageable pageable) {
+
+        org.springframework.data.jpa.domain.Specification<Product> spec = com.example.novawear.specification.ProductSpecification
+                .filter(
+                        categoryIds, minPrice, maxPrice, sizes, colors, minRating, gender,
+                        search, onSale, bestseller, isNew, lowStock);
+
+        return productRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
     @Transactional
     public ProductDto create(ProductDto dto) {
         Category cat = categoryRepository.findById(dto.getCategoryId())
@@ -292,5 +316,74 @@ public class ProductService {
             throw new IllegalArgumentException("Product not found: " + id);
         }
         productRepository.deleteById(id);
+    }
+
+    /**
+     * Sản phẩm liên quan: cùng category, tối đa 8 sản phẩm
+     */
+    @Transactional(readOnly = true)
+    public List<ProductDto> findRelatedProducts(Long productId, int limit) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
+
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit);
+        List<Product> related = productRepository.findRelatedByCategory(
+                product.getCategory().getId(), productId, pageable);
+
+        return related.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    /**
+     * Sản phẩm tương tự: cùng khoảng giá (+-30%), tối đa 8 sản phẩm
+     */
+    @Transactional(readOnly = true)
+    public List<ProductDto> findSimilarProducts(Long productId, int limit) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
+
+        java.math.BigDecimal price = product.getPrice();
+        java.math.BigDecimal minPrice = price.multiply(java.math.BigDecimal.valueOf(0.7));
+        java.math.BigDecimal maxPrice = price.multiply(java.math.BigDecimal.valueOf(1.3));
+
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit);
+        List<Product> similar = productRepository.findSimilarByPrice(
+                productId, price, minPrice, maxPrice, pageable);
+
+        return similar.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public com.example.novawear.dto.ProductFiltersDto getAvailableFilters() {
+        List<Product> products = productRepository.findAll();
+
+        java.math.BigDecimal minPrice = null;
+        java.math.BigDecimal maxPrice = null;
+        java.util.Set<String> sizes = new java.util.HashSet<>();
+        java.util.Set<String> colors = new java.util.HashSet<>();
+
+        for (Product p : products) {
+            // Price
+            java.math.BigDecimal price = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+            if (minPrice == null || price.compareTo(minPrice) < 0) {
+                minPrice = price;
+            }
+            if (maxPrice == null || price.compareTo(maxPrice) > 0) {
+                maxPrice = price;
+            }
+
+            // Sizes
+            sizes.addAll(parseSizes(p.getSizes()));
+
+            // Colors
+            List<ProductColorDto> productColors = parseColors(p.getColors());
+            for (ProductColorDto c : productColors) {
+                if (c.getName() != null) {
+                    colors.add(c.getName());
+                }
+            }
+        }
+
+        return new com.example.novawear.dto.ProductFiltersDto(
+                minPrice, maxPrice, new java.util.ArrayList<>(sizes), new java.util.ArrayList<>(colors));
     }
 }

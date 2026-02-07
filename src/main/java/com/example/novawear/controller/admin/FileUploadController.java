@@ -7,7 +7,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +25,8 @@ public class FileUploadController {
             Map<String, String> response = new HashMap<>();
             response.put("url", url);
             return ResponseEntity.ok(response);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", "Upload failed: " + e.getMessage()));
         }
     }

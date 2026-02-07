@@ -25,25 +25,38 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<Page<OrderDto>> myOrders(@AuthenticationPrincipal UserDetails user,
-                                                    @RequestParam(defaultValue = "0") int page,
-                                                    @RequestParam(defaultValue = "10") int size) {
-        if (user == null) return ResponseEntity.status(401).build();
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        if (user == null)
+            return ResponseEntity.status(401).build();
         Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
         return ResponseEntity.ok(orderService.findByUsername(user.getUsername(), pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderDto> getById(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
         return ResponseEntity.ok(orderService.getById(id));
     }
 
     @PostMapping("/checkout")
     public ResponseEntity<OrderDto> checkout(@AuthenticationPrincipal UserDetails user,
-                                            @Valid @RequestBody CheckoutRequest request) {
-        if (user == null) return ResponseEntity.status(401).build();
+            @Valid @RequestBody CheckoutRequest request) {
+        if (user == null)
+            return ResponseEntity.status(401).build();
         OrderDto order = orderService.checkout(user.getUsername(), request);
         cartService.clear(user.getUsername());
+        return ResponseEntity.ok(order);
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<OrderDto> cancelOrder(@AuthenticationPrincipal UserDetails user,
+            @PathVariable Long id,
+            @RequestParam(required = false) String reason) {
+        if (user == null)
+            return ResponseEntity.status(401).build();
+        OrderDto order = orderService.cancelOrder(id, user.getUsername(), reason);
         return ResponseEntity.ok(order);
     }
 }
