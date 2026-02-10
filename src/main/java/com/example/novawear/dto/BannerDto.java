@@ -30,6 +30,19 @@ public class BannerDto {
     @Size(max = 50)
     private String ctaText;
 
+    private String description;
+
+    @Size(max = 50)
+    private String ctaText2;
+
+    @Size(max = 500)
+    private String linkUrl2;
+
+    @Size(max = 50)
+    private String badgeText;
+
+    private String bannerType;
+
     private Integer sortOrder;
 
     private Boolean active;
@@ -44,6 +57,11 @@ public class BannerDto {
         dto.setImageUrl(b.getImageUrl());
         dto.setLinkUrl(b.getLinkUrl());
         dto.setCtaText(b.getCtaText());
+        dto.setDescription(b.getDescription());
+        dto.setCtaText2(b.getCtaText2());
+        dto.setLinkUrl2(b.getLinkUrl2());
+        dto.setBadgeText(b.getBadgeText());
+        dto.setBannerType(b.getBannerType() != null ? b.getBannerType().name() : "CAROUSEL");
         dto.setSortOrder(b.getSortOrder());
         dto.setActive(b.getActive());
         dto.setCreatedAt(b.getCreatedAt());

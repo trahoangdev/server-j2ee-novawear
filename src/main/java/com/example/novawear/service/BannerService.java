@@ -33,6 +33,13 @@ public class BannerService {
     }
 
     @Transactional(readOnly = true)
+    public BannerDto findActivePromoBanner() {
+        return bannerRepository.findFirstByActiveTrueAndBannerTypeOrderBySortOrderAsc(Banner.BannerType.PROMO)
+                .map(BannerDto::from)
+                .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
     public BannerDto getById(Long id) {
         Banner b = bannerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Banner not found: " + id));
@@ -47,6 +54,13 @@ public class BannerService {
                 .imageUrl(dto.getImageUrl() != null ? dto.getImageUrl() : "")
                 .linkUrl(dto.getLinkUrl())
                 .ctaText(dto.getCtaText())
+                .description(dto.getDescription())
+                .ctaText2(dto.getCtaText2())
+                .linkUrl2(dto.getLinkUrl2())
+                .badgeText(dto.getBadgeText())
+                .bannerType(dto.getBannerType() != null && !dto.getBannerType().isBlank() 
+                    ? Banner.BannerType.valueOf(dto.getBannerType().toUpperCase()) 
+                    : Banner.BannerType.CAROUSEL)
                 .sortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0)
                 .active(dto.getActive() != null ? dto.getActive() : true)
                 .build();
@@ -63,6 +77,17 @@ public class BannerService {
         if (dto.getImageUrl() != null) b.setImageUrl(dto.getImageUrl());
         if (dto.getLinkUrl() != null) b.setLinkUrl(dto.getLinkUrl());
         if (dto.getCtaText() != null) b.setCtaText(dto.getCtaText());
+        if (dto.getDescription() != null) b.setDescription(dto.getDescription());
+        if (dto.getCtaText2() != null) b.setCtaText2(dto.getCtaText2());
+        if (dto.getLinkUrl2() != null) b.setLinkUrl2(dto.getLinkUrl2());
+        if (dto.getBadgeText() != null) b.setBadgeText(dto.getBadgeText());
+        if (dto.getBannerType() != null && !dto.getBannerType().isBlank()) {
+            try {
+                b.setBannerType(Banner.BannerType.valueOf(dto.getBannerType().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Invalid type, keep current value
+            }
+        }
         if (dto.getSortOrder() != null) b.setSortOrder(dto.getSortOrder());
         if (dto.getActive() != null) b.setActive(dto.getActive());
         b = bannerRepository.save(b);

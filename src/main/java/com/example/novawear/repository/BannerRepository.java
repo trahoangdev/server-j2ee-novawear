@@ -10,4 +10,6 @@ import java.util.List;
 public interface BannerRepository extends JpaRepository<Banner, Long> {
 
     List<Banner> findAllByActiveTrueOrderBySortOrderAsc();
+    
+    java.util.Optional<Banner> findFirstByActiveTrueAndBannerTypeOrderBySortOrderAsc(Banner.BannerType bannerType);
 }

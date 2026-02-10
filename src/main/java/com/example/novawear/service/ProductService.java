@@ -227,6 +227,17 @@ public class ProductService {
                 .bestseller(Boolean.TRUE.equals(dto.getBestseller()))
                 .isNew(Boolean.TRUE.equals(dto.getIsNew()))
                 .build();
+        // Set gender
+        if (dto.getGender() != null && !dto.getGender().isBlank()) {
+            try {
+                p.setGender(Product.Gender.valueOf(dto.getGender().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Invalid gender, use default UNISEX
+                p.setGender(Product.Gender.UNISEX);
+            }
+        } else {
+            p.setGender(Product.Gender.UNISEX);
+        }
         p.setSizes(serializeSizes(dto.getSizes()));
         p.setColors(serializeColors(dto.getColors()));
         // Set images: use images list if provided, otherwise fallback to imageUrl
@@ -282,6 +293,17 @@ public class ProductService {
             p.setSizes(serializeSizes(dto.getSizes()));
         if (dto.getColors() != null)
             p.setColors(serializeColors(dto.getColors()));
+        // Update gender
+        if (dto.getGender() != null && !dto.getGender().isBlank()) {
+            try {
+                p.setGender(Product.Gender.valueOf(dto.getGender().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Invalid gender, keep current value or use default
+                if (p.getGender() == null) {
+                    p.setGender(Product.Gender.UNISEX);
+                }
+            }
+        }
         // Update images: use images list if provided, otherwise fallback to imageUrl
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
             p.setImages(serializeImages(dto.getImages()));

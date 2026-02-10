@@ -21,4 +21,13 @@ public class BannerController {
     public ResponseEntity<List<BannerDto>> findAllActive() {
         return ResponseEntity.ok(bannerService.findAllActive());
     }
+
+    @GetMapping("/promo")
+    public ResponseEntity<BannerDto> findPromoBanner() {
+        BannerDto promo = bannerService.findActivePromoBanner();
+        if (promo == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(promo);
+    }
 }
