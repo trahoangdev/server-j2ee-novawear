@@ -39,9 +39,34 @@ public class Banner {
     @Column(name = "cta_text", length = 50)
     private String ctaText;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Size(max = 50)
+    @Column(name = "cta_text2", length = 50)
+    private String ctaText2;
+
+    @Size(max = 500)
+    @Column(name = "link_url2", length = 500)
+    private String linkUrl2;
+
+    @Size(max = 50)
+    @Column(name = "badge_text", length = 50)
+    private String badgeText;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "banner_type", length = 20)
+    @Builder.Default
+    private BannerType bannerType = BannerType.CAROUSEL;
+
     @Column(name = "sort_order", nullable = false)
     @Builder.Default
     private Integer sortOrder = 0;
+
+    public enum BannerType {
+        CAROUSEL, // Banner cho carousel ở đầu trang
+        PROMO     // Banner promo ở giữa trang
+    }
 
     @Column(nullable = false)
     @Builder.Default
