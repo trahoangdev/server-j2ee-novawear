@@ -45,4 +45,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                         Pageable pageable);
 
         List<Order> findByOrderCodeIsNull();
+
+        java.util.Optional<Order> findByOrderCode(String orderCode);
+
+        @Query("SELECT o FROM Order o JOIN FETCH o.user WHERE o.id = :id")
+        java.util.Optional<Order> findByIdWithUser(@Param("id") Long id);
 }
