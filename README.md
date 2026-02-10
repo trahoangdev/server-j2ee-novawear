@@ -31,14 +31,25 @@ API gốc: **http://localhost:8080**
 
 Trong Swagger UI, bấm **Authorize** và nhập JWT token (trả về từ `POST /api/auth/login`) để gọi các API cần đăng nhập.
 
-## Tài khoản mặc định (dev)
+## Seed dữ liệu (tùy chọn)
 
-Sau lần chạy đầu, có sẵn user admin:
+Seed **tắt mặc định**. Chỉ chạy khi bật profile `seed`:
 
-- **Username:** `admin`
-- **Password:** `admin123`
+```bash
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=seed"
+```
 
-*(Đổi mật khẩu hoặc tắt seed trong production.)*
+Khi chạy với profile `seed`: tạo users (admin, customer, nguyenvan) nếu chưa có; nếu chưa có category nào thì chèn thêm categories, products, orders, reviews.
+
+## Tài khoản mặc định (sau khi chạy seed)
+
+Sau khi chạy với profile `seed` (xem mục Seed dữ liệu):
+
+| Vai trò   | Username  | Password    |
+|----------|-----------|-------------|
+| Admin    | `admin`   | `admin123`  |
+| Khách hàng | `customer` | `customer123` |
+| Khách hàng | `nguyenvan` | `123456` |
 
 ## API chính (theo PRD)
 

@@ -8,6 +8,7 @@ import com.example.novawear.entity.User;
 import com.example.novawear.repository.UserRepository;
 import com.example.novawear.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,8 +27,21 @@ public class AuthService {
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
+        String input = request.getUsername() != null ? request.getUsername().trim() : "";
+        if (input.isEmpty()) {
+            throw new BadCredentialsException("Username or email required");
+        }
+        // Allow login with username or email: resolve to username
+        String username;
+        if (input.contains("@")) {
+            username = userRepository.findByEmail(input)
+                    .map(User::getUsername)
+                    .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+        } else {
+            username = input;
+        }
         Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+                new UsernamePasswordAuthenticationToken(username, request.getPassword()));
         User user = userRepository.findByUsername(auth.getName()).orElseThrow();
         String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole().name());
         return LoginResponse.from(user, token);

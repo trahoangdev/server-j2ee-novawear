@@ -29,6 +29,10 @@ public class Product {
     @Column(nullable = false, length = 200)
     private String name;
 
+    @Size(max = 255)
+    @Column(name = "slug", length = 255)
+    private String slug;
+
     @NotNull
     @DecimalMin("0")
     @Column(nullable = false, precision = 12, scale = 2)
@@ -42,6 +46,11 @@ public class Product {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    /** JSON array of image URLs, e.g. ["url1", "url2"]. Max 2000 chars. */
+    @Size(max = 2000)
+    @Column(name = "images", columnDefinition = "TEXT")
+    private String images;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
@@ -52,6 +61,39 @@ public class Product {
     @Builder.Default
     private Integer stock = 0;
 
+    /** Giá khuyến mãi (null = không giảm). Nếu set và < price thì hiển thị sale. */
+    @DecimalMin("0")
+    @Column(name = "sale_price", precision = 12, scale = 2)
+    private BigDecimal salePrice;
+
+    /** Nổi bật: hiển thị ở block "Sản phẩm nổi bật" trang chủ */
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean featured = false;
+
+    /** Bán chạy: nhãn do admin đánh dấu */
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean bestseller = false;
+
+    /** Hàng mới: hiển thị badge "Mới" trên thẻ sản phẩm */
+    @Column(name = "is_new", nullable = false)
+    @Builder.Default
+    private Boolean isNew = false;
+
+    /** JSON array of size codes, e.g. ["S","M","L","XL"]. Max 500 chars. */
+    @Size(max = 500)
+    @Column(name = "sizes", length = 500)
+    private String sizes;
+
+    /**
+     * JSON array of {name, hex}, e.g. [{"name":"Đen","hex":"#2D2D2D"}]. Max 2000
+     * chars.
+     */
+    @Size(max = 2000)
+    @Column(name = "colors", length = 2000)
+    private String colors;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderDetail> orderDetails = new ArrayList<>();
@@ -59,4 +101,18 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
+
+    /**
+     * Giới tính: MALE, FEMALE, UNISEX
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private Gender gender = Gender.UNISEX;
+
+    public enum Gender {
+        MALE, // Nam
+        FEMALE, // Nữ
+        UNISEX // Cả nam và nữ
+    }
 }
