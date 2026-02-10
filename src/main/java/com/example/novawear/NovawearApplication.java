@@ -1,10 +1,13 @@
 package com.example.novawear;
 
+import com.example.novawear.config.VnPayConfig;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
+@EnableConfigurationProperties(VnPayConfig.class)
 public class NovawearApplication {
 
 	public static void main(String[] args) {
@@ -28,6 +31,11 @@ public class NovawearApplication {
 			setProperty("DB_URL", dotenv.get("DB_URL"));
 			setProperty("DB_USERNAME", dotenv.get("DB_USERNAME"));
 			setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
+			setProperty("VNPAY_TMN_CODE", dotenv.get("VNPAY_TMN_CODE"));
+			setProperty("VNPAY_HASH_SECRET", dotenv.get("VNPAY_HASH_SECRET"));
+			setProperty("VNPAY_PAYMENT_URL", dotenv.get("VNPAY_PAYMENT_URL"));
+			setProperty("VNPAY_RETURN_URL", dotenv.get("VNPAY_RETURN_URL"));
+			setProperty("VNPAY_IPN_URL", dotenv.get("VNPAY_IPN_URL"));
 
 			System.out.println("[Dotenv] Loaded .env file successfully");
 		} catch (Exception e) {
