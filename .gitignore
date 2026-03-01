@@ -1,8 +1,14 @@
 HELP.md
+
+### Build / Target ###
 target/
-.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Maven Wrapper ###
+.mvn/wrapper/maven-wrapper.jar
+
+### Dependencies / Cache ###
 .npm-cache/
 
 ### STS ###
@@ -36,4 +42,28 @@ build/
 ### Environment ###
 .env
 .env.local
-.env.*.local
+.env.*
+!.env.example
+
+### Logs ###
+*.log
+logs/
+spring.log
+
+### OS ###
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+### Java / Runtime ###
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+replay_pid*
+
+### Postman ###
+postman/
