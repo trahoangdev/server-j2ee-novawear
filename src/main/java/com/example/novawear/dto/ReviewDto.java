@@ -28,6 +28,7 @@ public class ReviewDto {
     private String comment;
     private Boolean approved;
     private Instant createdAt;
+    private java.util.List<String> images;
 
     public static ReviewDto from(Review r) {
         ReviewDto dto = new ReviewDto();
@@ -39,6 +40,11 @@ public class ReviewDto {
         dto.setComment(r.getComment());
         dto.setApproved(r.getApproved());
         dto.setCreatedAt(r.getCreatedAt());
+        if (r.getImages() != null && !r.getImages().isBlank()) {
+            dto.setImages(java.util.Arrays.asList(r.getImages().split(",")));
+        } else {
+            dto.setImages(java.util.Collections.emptyList());
+        }
         return dto;
     }
 }

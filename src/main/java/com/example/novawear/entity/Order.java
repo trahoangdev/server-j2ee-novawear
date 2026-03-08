@@ -72,6 +72,12 @@ public class Order {
     @Column(name = "payment_method", length = 30)
     private String paymentMethod;
 
+    @Column(name = "tracking_number", length = 100)
+    private String trackingNumber;
+
+    @Column(length = 100)
+    private String carrier;
+
     public enum OrderStatus {
         PENDING,
         CONFIRMED,

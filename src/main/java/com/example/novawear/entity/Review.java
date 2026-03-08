@@ -46,6 +46,9 @@ public class Review {
     @Builder.Default
     private Boolean approved = false;
 
+    @Column(columnDefinition = "TEXT")
+    private String images;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
