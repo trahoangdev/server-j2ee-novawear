@@ -46,6 +46,10 @@ public class ReturnRequestService {
                 .build();
         rr = returnRequestRepository.save(rr);
 
+        // Khi vừa tạo yêu cầu, đơn hàng chuyển sang trạng thái chờ xử lý trả hàng
+        order.setStatus(Order.OrderStatus.RETURNING);
+        orderRepository.save(order);
+
         notificationService.create(user.getId(), "RETURN",
                 "Yêu cầu trả hàng đã gửi",
                 "Yêu cầu trả hàng cho đơn #" + order.getOrderCode() + " đang được xử lý",
@@ -83,6 +87,18 @@ public class ReturnRequestService {
         if (adminNote != null) rr.setAdminNote(adminNote);
         rr = returnRequestRepository.save(rr);
 
+        Order order = rr.getOrder();
+        if (rr.getStatus() == ReturnRequest.ReturnStatus.APPROVED || rr.getStatus() == ReturnRequest.ReturnStatus.PENDING) {
+            order.setStatus(Order.OrderStatus.RETURNING);
+            orderRepository.save(order);
+        } else if (rr.getStatus() == ReturnRequest.ReturnStatus.COMPLETED) {
+            order.setStatus(Order.OrderStatus.RETURNED);
+            orderRepository.save(order);
+        } else if (rr.getStatus() == ReturnRequest.ReturnStatus.REJECTED) {
+            order.setStatus(Order.OrderStatus.DELIVERED);
+            orderRepository.save(order);
+        }
+
         String statusVi = switch (rr.getStatus()) {
             case APPROVED -> "được duyệt";
             case REJECTED -> "bị từ chối";
@@ -95,5 +111,10 @@ public class ReturnRequestService {
                 "/orders");
 
         return ReturnRequestDto.from(rr);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        returnRequestRepository.deleteById(id);
     }
 }

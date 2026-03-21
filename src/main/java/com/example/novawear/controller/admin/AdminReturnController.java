@@ -34,4 +34,10 @@ public class AdminReturnController {
                                                           @RequestParam(required = false) String adminNote) {
         return ResponseEntity.ok(returnRequestService.updateStatus(id, status, adminNote));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        returnRequestService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

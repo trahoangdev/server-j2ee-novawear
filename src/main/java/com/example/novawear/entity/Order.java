@@ -84,6 +84,8 @@ public class Order {
         PROCESSING,
         SHIPPED,
         DELIVERED,
-        CANCELLED
+        CANCELLED,
+        RETURNING,
+        RETURNED
     }
 }

@@ -64,4 +64,15 @@ public class NotificationService {
             }
         });
     }
+
+    @Transactional
+    public void deleteRead(Long userId) {
+        var page = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId,
+                org.springframework.data.domain.Pageable.unpaged());
+        page.getContent().forEach(n -> {
+            if (n.getIsRead()) {
+                notificationRepository.delete(n);
+            }
+        });
+    }
 }

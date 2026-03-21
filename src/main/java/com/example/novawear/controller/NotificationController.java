@@ -50,4 +50,12 @@ public class NotificationController {
         notificationService.markAllAsRead(user.getId());
         return ResponseEntity.ok(Map.of("message", "Đã đọc tất cả"));
     }
+
+    @DeleteMapping("/read")
+    public ResponseEntity<Map<String, String>> deleteRead(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        notificationService.deleteRead(user.getId());
+        return ResponseEntity.ok(Map.of("message", "Đã xóa các thông báo đã đọc"));
+    }
 }
