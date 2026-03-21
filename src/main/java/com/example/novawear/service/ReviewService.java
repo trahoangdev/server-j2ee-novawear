@@ -93,6 +93,24 @@ public class ReviewService {
     }
 
     @Transactional
+    public ReviewDto createWithImages(String username, Long productId, ReviewDto dto, List<String> imageUrls) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
+        Review r = Review.builder()
+                .product(product)
+                .user(user)
+                .rating(dto.getRating())
+                .comment(dto.getComment())
+                .approved(false)
+                .images(imageUrls != null && !imageUrls.isEmpty() ? String.join(",", imageUrls) : null)
+                .build();
+        r = reviewRepository.save(r);
+        ReviewDto result = ReviewDto.from(r);
+        result.setUsername(user.getUsername());
+        return result;
+    }
+
+    @Transactional
     public ReviewDto approve(Long id, boolean approved) {
         Review r = reviewRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Review not found: " + id));
         r.setApproved(approved);

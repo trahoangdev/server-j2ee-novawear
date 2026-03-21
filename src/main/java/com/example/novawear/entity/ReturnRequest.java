@@ -1,59 +1,60 @@
 package com.example.novawear.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.Instant;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "return_requests")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Review {
+public class ReturnRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @NotNull
-    @Min(1)
-    @Max(5)
-    @Column(nullable = false)
-    private Integer rating;
+    @NotBlank
+    @Column(nullable = false, length = 500)
+    private String reason;
 
-    @Size(max = 1000)
-    @Column(length = 1000)
-    private String comment;
-
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     @Builder.Default
-    private Boolean approved = false;
+    private ReturnStatus status = ReturnStatus.PENDING;
 
     @Column(columnDefinition = "TEXT")
     private String images;
 
+    @Column(name = "admin_note", length = 500)
+    private String adminNote;
+
     @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
     private Instant createdAt = Instant.now();
 
     @PrePersist
-    void createdAt() {
+    void prePersist() {
         if (this.createdAt == null) this.createdAt = Instant.now();
+    }
+
+    public enum ReturnStatus {
+        PENDING,
+        APPROVED,
+        REJECTED,
+        COMPLETED
     }
 }

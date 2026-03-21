@@ -172,6 +172,16 @@ public class OrderService {
         return OrderDto.from(order);
     }
 
+    @Transactional
+    public OrderDto updateTracking(Long id, String trackingNumber, String carrier) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
+        if (trackingNumber != null) order.setTrackingNumber(trackingNumber);
+        if (carrier != null) order.setCarrier(carrier);
+        order = orderRepository.save(order);
+        return OrderDto.from(order);
+    }
+
     /**
      * Hủy đơn hàng (chỉ cho phép khi status = PENDING hoặc CONFIRMED)
      */

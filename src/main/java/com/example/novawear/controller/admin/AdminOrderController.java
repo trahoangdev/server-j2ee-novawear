@@ -53,4 +53,11 @@ public class AdminOrderController {
         Order.OrderStatus s = Order.OrderStatus.valueOf(status.toUpperCase());
         return ResponseEntity.ok(orderService.updateStatus(id, s));
     }
+
+    @PatchMapping("/{id}/tracking")
+    public ResponseEntity<OrderDto> updateTracking(@PathVariable Long id,
+                                                    @RequestParam(required = false) String trackingNumber,
+                                                    @RequestParam(required = false) String carrier) {
+        return ResponseEntity.ok(orderService.updateTracking(id, trackingNumber, carrier));
+    }
 }

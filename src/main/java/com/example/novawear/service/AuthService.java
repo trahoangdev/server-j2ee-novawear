@@ -1,7 +1,9 @@
 package com.example.novawear.service;
 
+import com.example.novawear.dto.ChangePasswordRequest;
 import com.example.novawear.dto.LoginRequest;
 import com.example.novawear.dto.LoginResponse;
+import com.example.novawear.dto.ProfileUpdateRequest;
 import com.example.novawear.dto.RegisterRequest;
 import com.example.novawear.dto.UserResponse;
 import com.example.novawear.entity.User;
@@ -69,5 +71,56 @@ public class AuthService {
     public UserResponse me(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
         return UserResponse.from(user);
+    }
+
+    @Transactional
+    public UserResponse updateProfile(String username, ProfileUpdateRequest request) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Update email if changed
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            String newEmail = request.getEmail().trim();
+            if (!newEmail.equalsIgnoreCase(user.getEmail())) {
+                if (userRepository.existsByEmail(newEmail)) {
+                    throw new IllegalArgumentException("Email đã được sử dụng bởi tài khoản khác");
+                }
+                user.setEmail(newEmail);
+            }
+        }
+
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName().trim().isEmpty() ? null : request.getFullName().trim());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone().trim().isEmpty() ? null : request.getPhone().trim());
+        }
+        if (request.getAddress() != null) {
+            user.setAddress(request.getAddress().trim().isEmpty() ? null : request.getAddress().trim());
+        }
+
+        user = userRepository.save(user);
+        return UserResponse.from(user);
+    }
+
+    @Transactional
+    public void changePassword(String username, ChangePasswordRequest request) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không đúng");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu mới phải khác mật khẩu hiện tại");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 }

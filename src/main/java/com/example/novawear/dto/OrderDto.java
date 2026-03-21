@@ -35,6 +35,10 @@ public class OrderDto {
     private BigDecimal discountAmount;
     private String paymentMethod;
 
+    // Tracking fields
+    private String trackingNumber;
+    private String carrier;
+
     public static OrderDto from(Order o) {
         OrderDto dto = new OrderDto();
         dto.setId(o.getId());
@@ -62,6 +66,8 @@ public class OrderDto {
         }
         dto.setDiscountAmount(o.getDiscountAmount());
         dto.setPaymentMethod(o.getPaymentMethod());
+        dto.setTrackingNumber(o.getTrackingNumber());
+        dto.setCarrier(o.getCarrier());
 
         return dto;
     }

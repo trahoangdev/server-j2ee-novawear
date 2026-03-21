@@ -4,10 +4,14 @@ import com.example.novawear.dto.CartAddRequest;
 import com.example.novawear.dto.CartItemDto;
 import com.example.novawear.entity.Product;
 import com.example.novawear.repository.ProductRepository;
+import com.example.novawear.repository.FlashSaleRepository;
+import com.example.novawear.entity.FlashSale;
+import com.example.novawear.entity.FlashSaleProduct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CartService {
 
     private final ProductRepository productRepository;
+    private final FlashSaleRepository flashSaleRepository;
 
     private final Map<String, List<CartItemDto>> carts = new ConcurrentHashMap<>();
 
@@ -31,11 +36,28 @@ public class CartService {
     public List<CartItemDto> add(String username, CartAddRequest request) {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + request.getProductId()));
+        BigDecimal actualPrice = product.getPrice();
+        boolean isFlashSale = false;
+
+        List<FlashSale> activeSales = flashSaleRepository.findActiveNow(Instant.now());
+        for (FlashSale sale : activeSales) {
+            for (FlashSaleProduct fp : sale.getProducts()) {
+                if (fp.getProduct().getId().equals(product.getId())) {
+                    actualPrice = fp.getSalePrice();
+                    isFlashSale = true;
+                    break;
+                }
+            }
+            if (isFlashSale) break;
+        }
+
         List<CartItemDto> items = new ArrayList<>(carts.getOrDefault(username, List.of()));
         boolean found = false;
         for (CartItemDto item : items) {
             if (item.getProductId().equals(request.getProductId())) {
                 item.setQuantity(item.getQuantity() + request.getQuantity());
+                item.setPrice(actualPrice);
+                item.setIsFlashSale(isFlashSale);
                 item.setSubtotal(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
                 found = true;
                 break;
@@ -46,9 +68,10 @@ public class CartService {
             newItem.setProductId(product.getId());
             newItem.setProductName(product.getName());
             newItem.setImageUrl(product.getImageUrl());
-            newItem.setPrice(product.getPrice());
+            newItem.setPrice(actualPrice);
+            newItem.setIsFlashSale(isFlashSale);
             newItem.setQuantity(request.getQuantity());
-            newItem.setSubtotal(product.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
+            newItem.setSubtotal(actualPrice.multiply(BigDecimal.valueOf(request.getQuantity())));
             items.add(newItem);
         }
         carts.put(username, items);

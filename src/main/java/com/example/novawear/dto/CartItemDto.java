@@ -21,4 +21,5 @@ public class CartItemDto {
     @Min(1)
     private Integer quantity;
     private BigDecimal subtotal;
+    private Boolean isFlashSale;
 }
