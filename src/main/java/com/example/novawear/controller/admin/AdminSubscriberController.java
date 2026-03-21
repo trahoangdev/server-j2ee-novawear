@@ -35,4 +35,16 @@ public class AdminSubscriberController {
         subscriberService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/send-email")
+    public ResponseEntity<Map<String, String>> sendEmail(@RequestBody Map<String, String> payload) {
+        String subject = payload.get("subject");
+        String content = payload.get("content");
+        // For now, since JavaMailSender is not configured, we just mock the sending.
+        // In a real application, you would inject JavaMailSender and loop through all active subscribers
+        // and .send(email) to each.
+        long activeCount = subscriberService.countActive();
+        System.out.println("MOCK SEND EMAIL: " + subject + " to " + activeCount + " subscribers with content:\n" + content);
+        return ResponseEntity.ok(Map.of("message", "Đã giả lập gửi email thành công tới " + activeCount + " người đăng ký. (SMTP chưa được cấu hình)"));
+    }
 }

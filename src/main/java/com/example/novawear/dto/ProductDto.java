@@ -54,6 +54,9 @@ public class ProductDto {
     /** Hàng mới: badge "Mới" trên thẻ sản phẩm */
     private Boolean isNew;
 
+    /** Đang trong đợt flash sale */
+    private Boolean isFlashSale;
+
     /** Mã size, e.g. ["S","M","L","XL"] */
     private List<String> sizes;
 

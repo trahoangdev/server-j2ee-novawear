@@ -7,6 +7,9 @@ import com.example.novawear.entity.Category;
 import com.example.novawear.entity.Product;
 import com.example.novawear.repository.CategoryRepository;
 import com.example.novawear.repository.ProductRepository;
+import com.example.novawear.repository.FlashSaleRepository;
+import com.example.novawear.entity.FlashSale;
+import com.example.novawear.entity.FlashSaleProduct;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final FlashSaleRepository flashSaleRepository;
     private final ObjectMapper objectMapper;
 
     private List<String> parseSizes(String json) {
@@ -124,6 +128,20 @@ public class ProductService {
             imageList = Collections.singletonList(p.getImageUrl());
         }
         dto.setImages(imageList);
+
+        // Apply Flash Sale Override if active
+        List<FlashSale> activeSales = flashSaleRepository.findActiveNow(java.time.Instant.now());
+        for (FlashSale sale : activeSales) {
+            for (FlashSaleProduct fp : sale.getProducts()) {
+                if (fp.getProduct().getId().equals(p.getId())) {
+                    dto.setSalePrice(fp.getSalePrice());
+                    dto.setIsFlashSale(true);
+                    break;
+                }
+            }
+            if (Boolean.TRUE.equals(dto.getIsFlashSale())) break;
+        }
+
         return dto;
     }
 

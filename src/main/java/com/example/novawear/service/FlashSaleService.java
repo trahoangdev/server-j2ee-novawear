@@ -65,7 +65,16 @@ public class FlashSaleService {
         if (dto.getName() != null) fs.setName(dto.getName());
         if (dto.getStartTime() != null) fs.setStartTime(dto.getStartTime());
         if (dto.getEndTime() != null) fs.setEndTime(dto.getEndTime());
-        if (dto.getDiscountPercent() != null) fs.setDiscountPercent(dto.getDiscountPercent());
+        if (dto.getDiscountPercent() != null) {
+            fs.setDiscountPercent(dto.getDiscountPercent());
+            for (FlashSaleProduct p : fs.getProducts()) {
+                p.setSalePrice(
+                        p.getProduct().getPrice()
+                                .multiply(BigDecimal.valueOf(100 - dto.getDiscountPercent()))
+                                .divide(BigDecimal.valueOf(100), 0, RoundingMode.FLOOR)
+                );
+            }
+        }
         if (dto.getActive() != null) fs.setActive(dto.getActive());
         fs = flashSaleRepository.save(fs);
         return FlashSaleDto.from(fs);
@@ -81,6 +90,10 @@ public class FlashSaleService {
         BigDecimal salePrice = product.getPrice()
                 .multiply(BigDecimal.valueOf(100 - fs.getDiscountPercent()))
                 .divide(BigDecimal.valueOf(100), 0, RoundingMode.FLOOR);
+
+        if (fs.getProducts().stream().anyMatch(p -> p.getProduct().getId().equals(productId))) {
+            throw new IllegalArgumentException("Sản phẩm này đã có trong Flash Sale.");
+        }
 
         FlashSaleProduct fsp = FlashSaleProduct.builder()
                 .flashSale(fs)

@@ -74,6 +74,10 @@ public class BundleService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
 
+        if (bundle.getItems().stream().anyMatch(item -> item.getProduct().getId().equals(productId))) {
+            throw new IllegalArgumentException("Sản phẩm đã tồn tại trong Combo này.");
+        }
+
         BundleItem item = BundleItem.builder()
                 .bundle(bundle)
                 .product(product)
