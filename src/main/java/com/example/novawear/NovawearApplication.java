@@ -36,6 +36,7 @@ public class NovawearApplication {
 			setProperty("VNPAY_PAYMENT_URL", dotenv.get("VNPAY_PAYMENT_URL"));
 			setProperty("VNPAY_RETURN_URL", dotenv.get("VNPAY_RETURN_URL"));
 			setProperty("VNPAY_IPN_URL", dotenv.get("VNPAY_IPN_URL"));
+            setProperty("GOOGLE_CLIENT_ID", dotenv.get("GOOGLE_CLIENT_ID"));
 
 			System.out.println("[Dotenv] Loaded .env file successfully");
 		} catch (Exception e) {

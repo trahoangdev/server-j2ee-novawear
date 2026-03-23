@@ -9,7 +9,11 @@ import com.example.novawear.dto.UserResponse;
 import com.example.novawear.entity.User;
 import com.example.novawear.repository.UserRepository;
 import com.example.novawear.security.JwtUtil;
+import com.example.novawear.dto.GoogleLoginRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +30,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+
+    @Value("${app.google.client-id}")
+    private String googleClientId;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -47,6 +54,45 @@ public class AuthService {
         User user = userRepository.findByUsername(auth.getName()).orElseThrow();
         String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole().name());
         return LoginResponse.from(user, token);
+    }
+
+    @Transactional
+    public LoginResponse googleLogin(GoogleLoginRequest request) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                    new com.google.api.client.http.javanet.NetHttpTransport(),
+                    new com.google.api.client.json.gson.GsonFactory())
+                    .setAudience(java.util.Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(request.getToken());
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+
+                String email = payload.getEmail();
+                String name = (String) payload.get("name");
+                
+                User user = userRepository.findByEmail(email).orElse(null);
+                if (user == null) {
+                    user = User.builder()
+                            .username(email)
+                            .password(passwordEncoder.encode(java.util.UUID.randomUUID().toString()))
+                            .email(email)
+                            .fullName(name)
+                            .role(User.Role.USER)
+                            .active(true)
+                            .build();
+                    user = userRepository.save(user);
+                }
+                
+                String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole().name());
+                return LoginResponse.from(user, token);
+            } else {
+                throw new BadCredentialsException("Invalid Google token");
+            }
+        } catch (Exception e) {
+            throw new BadCredentialsException("Failed to verify Google token", e);
+        }
     }
 
     @Transactional
