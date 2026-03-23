@@ -46,10 +46,17 @@ public class ProductService {
         if (json == null || json.isBlank())
             return Collections.emptyList();
         try {
-            return objectMapper.readValue(json, new TypeReference<>() {
-            });
+            return objectMapper.readValue(json, new TypeReference<List<ProductColorDto>>() {});
         } catch (Exception e) {
-            return Collections.emptyList();
+            // Backward compatibility for old format: List<String>
+            try {
+                List<String> oldFormat = objectMapper.readValue(json, new TypeReference<List<String>>() {});
+                return oldFormat.stream()
+                        .map(c -> new ProductColorDto(c, "#CCCCCC"))
+                        .collect(Collectors.toList());
+            } catch (Exception ex) {
+                return Collections.emptyList();
+            }
         }
     }
 
