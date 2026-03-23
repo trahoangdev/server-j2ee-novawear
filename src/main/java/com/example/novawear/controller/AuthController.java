@@ -3,6 +3,7 @@ package com.example.novawear.controller;
 import com.example.novawear.dto.ChangePasswordRequest;
 import com.example.novawear.dto.LoginRequest;
 import com.example.novawear.dto.LoginResponse;
+import com.example.novawear.dto.GoogleLoginRequest;
 import com.example.novawear.dto.ProfileUpdateRequest;
 import com.example.novawear.dto.RegisterRequest;
 import com.example.novawear.dto.UserResponse;
@@ -24,6 +25,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<LoginResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        LoginResponse response = authService.googleLogin(request);
         return ResponseEntity.ok(response);
     }
 

@@ -38,6 +38,8 @@ app:
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
     allowed-headers: "*"
     allow-credentials: true
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:your_google_client_id}
 
 server:
   port: 8080
