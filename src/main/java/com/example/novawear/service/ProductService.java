@@ -46,10 +46,17 @@ public class ProductService {
         if (json == null || json.isBlank())
             return Collections.emptyList();
         try {
-            return objectMapper.readValue(json, new TypeReference<>() {
-            });
+            return objectMapper.readValue(json, new TypeReference<List<ProductColorDto>>() {});
         } catch (Exception e) {
-            return Collections.emptyList();
+            // Backward compatibility for old format: List<String>
+            try {
+                List<String> oldFormat = objectMapper.readValue(json, new TypeReference<List<String>>() {});
+                return oldFormat.stream()
+                        .map(c -> new ProductColorDto(c, "#CCCCCC"))
+                        .collect(Collectors.toList());
+            } catch (Exception ex) {
+                return Collections.emptyList();
+            }
         }
     }
 
@@ -399,7 +406,7 @@ public class ProductService {
         java.math.BigDecimal minPrice = null;
         java.math.BigDecimal maxPrice = null;
         java.util.Set<String> sizes = new java.util.HashSet<>();
-        java.util.Set<String> colors = new java.util.HashSet<>();
+        java.util.Map<String, String> colorMap = new java.util.HashMap<>();
 
         for (Product p : products) {
             // Price
@@ -418,12 +425,16 @@ public class ProductService {
             List<ProductColorDto> productColors = parseColors(p.getColors());
             for (ProductColorDto c : productColors) {
                 if (c.getName() != null) {
-                    colors.add(c.getName());
+                    colorMap.putIfAbsent(c.getName(), c.getHex() != null && !c.getHex().isBlank() ? c.getHex() : "#CCCCCC");
                 }
             }
         }
 
+        List<ProductColorDto> colorList = colorMap.entrySet().stream()
+                .map(e -> new ProductColorDto(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+
         return new com.example.novawear.dto.ProductFiltersDto(
-                minPrice, maxPrice, new java.util.ArrayList<>(sizes), new java.util.ArrayList<>(colors));
+                minPrice, maxPrice, new java.util.ArrayList<>(sizes), colorList);
     }
 }

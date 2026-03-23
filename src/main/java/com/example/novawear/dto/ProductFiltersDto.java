@@ -14,5 +14,5 @@ public class ProductFiltersDto {
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
     private List<String> sizes;
-    private List<String> colors;
+    private List<ProductColorDto> colors;
 }

@@ -77,15 +77,12 @@ public class ProductSpecification {
                 p = cb.and(p, sizePredicate);
             }
 
-            // Colors (stored as JSON array of objects, e.g. [{"name":"Red","hex":"..."}])
+            // Colors (stored as JSON array of objects, e.g. [{"name":"Red","hex":"..."}] or legacy ["Red"])
             if (colors != null && !colors.isEmpty()) {
                 Predicate colorPredicate = cb.disjunction();
                 for (String c : colors) {
-                    // Simple check for name: LIKE '%"name":"Red"%'
-                    // This assumes the name field is consistent.
-                    // Or simpler: just match the string name if it's unique enough.
-                    // Let's rely on standard format: "name":"ColorName"
-                    colorPredicate = cb.or(colorPredicate, cb.like(root.get("colors"), "%\"name\":\"" + c + "\"%"));
+                    // Match generic quoted string \"Color\" which satisfies both new schema "name":"Color" and old schema "Color".
+                    colorPredicate = cb.or(colorPredicate, cb.like(root.get("colors"), "%\"" + c + "\"%"));
                 }
                 p = cb.and(p, colorPredicate);
             }
