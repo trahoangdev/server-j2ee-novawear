@@ -46,7 +46,7 @@ public class SecurityConfig {
                         // Admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // User (authenticated)
-                        .requestMatchers("/api/cart/**", "/api/orders/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/cart/**", "/api/orders/**", "/api/viewed-products/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/notifications/**").authenticated() // Notifications
                         .requestMatchers("/api/returns/**").authenticated() // Return requests
                         .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasAnyRole("USER", "ADMIN") // POST reviews cần auth
