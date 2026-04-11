@@ -71,3 +71,6 @@ vnpay:
   payment-url: ${VNPAY_PAYMENT_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
   return-url: ${VNPAY_RETURN_URL:http://localhost:5173/payment/vnpay/return}
   ipn-url: ${VNPAY_IPN_URL:http://localhost:8080/api/payment/vnpay/ipn}
+
+qwen:
+  api-key: ${QWEN_API_KEY:sk-fe249da07c234adc8ae86f9f3d0a856c}

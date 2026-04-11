@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/newsletter/**").permitAll() // Newsletter subscribe/unsubscribe
                         .requestMatchers(HttpMethod.GET, "/api/flash-sales/**").permitAll() // Flash sale public
                         .requestMatchers(HttpMethod.GET, "/api/bundles/**").permitAll() // Bundles public
+                        .requestMatchers("/api/chat/**").permitAll() // Chatbot Streaming
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Admin
