@@ -73,4 +73,4 @@ vnpay:
   ipn-url: ${VNPAY_IPN_URL:http://localhost:8080/api/payment/vnpay/ipn}
 
 qwen:
-  api-key: ${QWEN_API_KEY:sk-fe249da07c234adc8ae86f9f3d0a856c}
+  api-key: ${QWEN_API_KEY:sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
